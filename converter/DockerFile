@@ -1,8 +1,5 @@
-FROM ubuntu:latest
+FROM fedora:latest
 
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y \
-        handbrake-cli
+RUN dnf repolist all && dnf update -y  && dnf install vlc -y
 
 ENTRYPOINT [ "/bin/bash" ]

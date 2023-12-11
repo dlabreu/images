@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: container-build-run
+spec:
+  serviceAccountName: pipeline
+  pipelineRef:
+    name: converter-image-build
+  params:
+    - name: CODE-REPO
+      value: "https://github.com/dlabreu/images.git"
+    - name: REVISION
+      value: main
+    - name: CONTAINER-REGISTRY
+      value: "quay.io/dabreu/converter"
+    - name: TAG
+      value: test00
+    - name: CONTAINER-FILE
+      value: "converter/DockerFile"
+  workspaces:
+    - name: workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: "10Gi"

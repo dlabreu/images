@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: converter-image-build
+spec:
+  params:
+    - name: CODE-REPO
+      description: "Code Repository ex: github.com"
+    - name: CONTAINER-REGISTRY
+      description: "Container Image Registry ex: quay.io"          
+    - name: TAG
+      description: "Container Image Tag"
+    - name: CONTAINER-FILE
+      description: "Container Image Path in the workspace aka PV"
+    - name: REVISION
+      description: "Code Repository Branch"
+  workspaces:
+    - name: workspace
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: workspace
+      params:
+        - name: url
+          value: $(params.CODE-REPO)
+        - name: deleteExisting
+          value: "true"
+    - name: build-push-image
+      taskRef:
+        name: buildah
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: workspace
+      params:
+        - name: IMAGE
+          value: "$(params.CONTAINER-REGISTRY):$(params.TAG)"
+        - name: CONTAINER-REGISTRY
+          value: "$(params.CONTAINER-REGISTRY):$(params.TAG)"
+        - name: FORMAT
+          value: "docker"
+        - name: CONTAINER-FILE
+          value: "$(params.CONTAINER-FILE)"
